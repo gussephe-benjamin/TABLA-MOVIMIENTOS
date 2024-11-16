@@ -1,0 +1,83 @@
+org: antoniocot
+service: api-movimientos
+
+provider:
+  name: aws
+  runtime: python3.12
+  memorySize: 1024
+  timeout: 30
+  iam:
+    role: arn:aws:iam::316129865556:role/LabRole
+  environment:
+    MOVIMIENTOS_TABLE: TABLA-MOVIMIENTOS
+
+functions:
+  registrarMovimiento:
+    handler: registrarMovimiento.lambda_handler
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - TransaccionesTable
+              - StreamArn
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - PagosTable
+              - StreamArn
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - PrestamosTable
+              - StreamArn
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - SolicitudesTable
+              - StreamArn
+
+  listarMovimientos:
+    handler: listarMovimientos.lambda_handler
+    events:
+      - http:
+          path: /movimientos
+          method: get
+          cors: true
+          
+  obtenerMovimiento:
+    handler: obtenerMovimiento.lambda_handler
+    events:
+      - http:
+          path: /movimientos/detalle
+          method: get
+          cors: true
+
+  eliminarMovimiento:
+    handler: eliminarMovimiento.lambda_handler
+    events:
+      - http:
+          path: /movimientos/eliminar
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    MovimientosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.MOVIMIENTOS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: usuario_id
+            AttributeType: S
+          - AttributeName: fecha_movimiento
+            AttributeType: S
+        KeySchema:
+          - AttributeName: usuario_id
+            KeyType: HASH
+          - AttributeName: fecha_movimiento
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
