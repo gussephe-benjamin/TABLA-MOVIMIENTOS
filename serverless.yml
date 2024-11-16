@@ -19,7 +19,7 @@ functions:
           type: dynamodb
           arn:
             Fn::GetAtt:
-              - TABLA-TRANSACCIONES
+              - TABLA-TRANSACCION
               - StreamArn
       - stream:
           type: dynamodb
