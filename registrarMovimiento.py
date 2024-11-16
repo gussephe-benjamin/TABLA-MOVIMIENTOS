@@ -41,11 +41,6 @@ def lambda_handler(event, context):
             if resultado == 'exitoso':
                 monto = abs(monto)  # Aseguramos que sea positivo
 
-        elif 'TABLA-SOLICITUD-PRESTAMO' in event_source_arn:
-            tipo_movimiento = 'solicitud'
-            descripcion = "Solicitud creada"
-            # Las solicitudes pueden no tener un impacto directo en el monto, así que lo dejamos como está
-
         # Insertar el movimiento en la tabla de Movimientos
         movimientos_table.put_item(
             Item={
